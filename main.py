@@ -1,5 +1,4 @@
-from utils.get_skills import get_skills
-from utils.read_skill import read_skill
+import router
 
-for skill in get_skills():
-    print(read_skill(skill))
+result = router.eval_user_input("Why are you saying TEST TEST TEST?")
+print(result)
