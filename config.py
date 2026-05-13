@@ -1,1 +1,1 @@
-ROUTER_MODEL = "qwen2.5:3b"
+ROUTER_MODEL = "qwen2.5:0.5b"
