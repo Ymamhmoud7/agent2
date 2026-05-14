@@ -1,0 +1,15 @@
+# ── STT ──────────────────────────────────────────────
+faster-whisper>=1.0.3
+
+# ── TTS ──────────────────────────────────────────────
+kokoro>=0.9.4
+soundfile
+sounddevice
+
+# ── Audio capture / VAD ──────────────────────────────
+pyaudio
+webrtcvad-wheels      # pre-built wheels, no compiler needed on Windows
+
+# ── Utilities ────────────────────────────────────────
+numpy
+scipy
