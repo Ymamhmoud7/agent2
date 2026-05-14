@@ -16,19 +16,19 @@ def message(user_input: str, Model: str, History: list[dict] = [], systemPrompt 
     response = ollama.chat(
         model=Model,
         messages=[
-            {
-                "role": "system",
-                "content": systemPrompt
-            },
-            {
-                "role": "user",
-                "content": f"Context: {context_str} \n Message: {user_input}\n Label: "
-            }
+            {"role": "system", "content": systemPrompt},
+            *[
+                msg
+                for turn in History[-6:]
+                for msg in [
+                    {"role": "user", "content": turn["user"]},
+                    {"role": "assistant", "content": turn["assistant"]},
+                ]
+            ],
+            {"role": "user", "content": user_input},  # just the raw message
         ],
-        options={
-            "temperature": 0.0,
-            "num_predict": 5
-        },
+        stream=True
         
     )
-    return response['message']['content']
+    for chunk in response:
+        yield chunk['message']['content']
