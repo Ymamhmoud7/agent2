@@ -1,114 +1,42 @@
 import router
-import config
+import curses
 
-router_model = config.ROUTER_MODEL
+from utils import send_message
 
-pressure_test = """
-hey
-ok
-lol
-...
-👍
-hmm
-oh
-nice
-yeah no
-whatever
-I disagree
-that's wrong
-interesting
-I already knew that
-me too
-sounds good
-fair enough
-my name is John
-I like turtles
-this is boring
-no
-yes
-maybe
-hey
-ok
-lol
-...
-can you?
-help
-please
-really?
-what?
-why?
-how?
-seriously?
-are you sure?
-I don't get it
-that makes no sense
-you're wrong
-I give up
-never mind
-forget it
-thanks
-thank you
-ok great
-perfect
-got it
-understood
-noted
-go
-do it
-now
-again
-repeat
-continue
-stop
-list
-show me
-tell me
-explain
-why does X work?
-what is 2+2?
-define recursion
-is Python good?
-compare A and B
-give me an example
-make it shorter
-fix this
-help me write something
-what should I do?
-summarize the above
-translate "hello" to French
-write a haiku
-debug this
-"""
+def get_input(stdscr):
+    border = "=" * 20
+    stdscr.addstr(0, 0, border)
+    stdscr.addstr(1, 0, "> ")
+    stdscr.addstr(2, 0, border)
+    stdscr.move(1, 2)  
 
-max_len = max(len(x) for x in pressure_test.splitlines() if x.strip())
+    curses.echo()
+    user_input = stdscr.getstr(1, 2).decode("utf-8")
+    return user_input
 
-for x in pressure_test.splitlines():
-    if x.strip() == "":
-        continue
-    result = router.eval_user_input(x, Model=router_model)
-    print(f"Input: {x:<{max_len}} -> Output: {result}")
-    
-print("PRESSURE TEST DONE. ENTERING INTERACTIVE MODE.")
+def main():
+    while True:
+        message = curses.wrapper(get_input)
 
-while True:
-    user_input = input("> ")
-    
-    if user_input.lower() in ["exit", "quit"]:
-        print("Exiting...")
-        break
+        if message == "/exit":
+            print("Bai")
+            break
+        
+        if message == "":
+            continue
 
-    if user_input == "":
-        continue
+        if message == "/clear":
+            print("\033c", end="")
+            continue
 
-    if user_input.startswith("/changemodel"):
-        parts = user_input.split()
-        if len(parts) == 2:
-            new_model = parts[1]
-            print(f"Changing router model to '{new_model}'")
-            router_model = new_model
+        eval1 = router.eval_user_input(message)
+
+        if eval1 == "Action":
+            print("Action detected!")
+        elif eval1 == "Not Action":
+            print("Normal message detected!")
         else:
-            print("Usage: /changemodel <model_name>")
-        continue
+            print("Unknown message type detected!", eval1)
 
-    result = router.eval_user_input(user_input, Model=router_model)
-    print(result)
+if __name__ == "__main__":
+    main()
