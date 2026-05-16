@@ -51,7 +51,7 @@ Produce the JSON execution plan:"""
 
         raw = response["message"]["content"].strip()
         raw = sanitize_raw(raw)
-        # Strip markdown fences
+
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):
@@ -85,7 +85,6 @@ def reflect_on_results(user_input: str, results: list[str], model: str) -> str:
                     "'connected: True' means the VPN is ON. "
                     "Report clearly what happened in plain English. "
                     "Only call something a failure if 'success' is False. "
-                    "Be concise, 1-3 sentences max."
                 )
             },
             {
@@ -104,16 +103,39 @@ def execute_plan(plan: dict, executor) -> list[str]:
 
     def resolve_args(args: dict, i: int = 0) -> dict:
         resolved = {}
+        eval_context = {"i": i, **context}
+
         for k, v in args.items():
             if isinstance(v, str):
-                v = os.path.expanduser(v)
-                def replace_expr(match):
-                    expr = match.group(1).strip()
-                    try:
-                        return str(eval(expr, {"i": i, **context}))
-                    except:
-                        return match.group(0)
-                v = re.sub(r'\{([^}]+)\}', replace_expr, v)
+
+                result_chars = []
+                idx = 0
+                while idx < len(v):
+                    if v[idx] == '{':
+                        depth = 1
+                        j = idx + 1
+                        while j < len(v) and depth > 0:
+                            if v[j] == '{':
+                                depth += 1
+                            elif v[j] == '}':
+                                depth -= 1
+                            j += 1
+                        expr = v[idx + 1 : j - 1].strip()
+                        try:
+                            result_chars.append(str(eval(expr, {"__builtins__": {}}, eval_context)))
+                        except Exception:
+                            # Leave unresolvable expressions as-is
+                            result_chars.append(v[idx:j])
+                        idx = j
+                    else:
+                        result_chars.append(v[idx])
+                        idx += 1
+                v = "".join(result_chars)
+
+                if k in ("file_path", "folder_path", "path", "destination_dir",
+                         "root_dir", "working_dir", "old_path", "new_path"):
+                    v = os.path.expanduser(v)
+
             resolved[k] = v
         return resolved
 
@@ -127,7 +149,6 @@ def execute_plan(plan: dict, executor) -> list[str]:
                 label = "query" if stype == "query" else "call"
                 results.append(f"[{label}] {step['function']}({args}) → {result}")
 
-                # store result in context if requested
                 store_as = step.get("store_as")
                 if store_as and isinstance(result, dict):
                     context[store_as] = result
