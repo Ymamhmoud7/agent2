@@ -1,6 +1,33 @@
 import subprocess
 import sys
 
+DESCRIPTION = "Check whether Cloudflare WARP is currently connected or disconnected."
+
+EXAMPLES = [
+    {
+        "user": "is warp on?",
+        "plan": [
+            {
+                "type": "call",
+                "function": "check_warp_status",
+                "args": {}
+            }
+        ]
+    },
+    {
+        "user": "what is the warp status?",
+        "plan": [
+            {
+                "type": "call",
+                "function": "check_warp_status",
+                "args": {}
+            }
+        ]
+    }
+]
+
+
+
 def check_warp_status() -> dict:
     """
     Check whether Cloudflare WARP is currently connected or disconnected.

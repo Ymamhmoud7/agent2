@@ -1,6 +1,37 @@
 import subprocess
 import sys
 
+DESCRIPTION = "Install a Python library using pip."
+
+EXAMPLES = [
+    {
+        "user": "install the requests library",
+        "plan": [
+            {
+                "type": "call",
+                "function": "install_python_library",
+                "args": {
+                    "library_name": "requests"
+                }
+            }
+        ]
+    },
+    {
+        "user": "pip install flask",
+        "plan": [
+            {
+                "type": "call",
+                "function": "install_python_library",
+                "args": {
+                    "library_name": "flask"
+                }
+            }
+        ]
+    }
+]
+
+
+
 def install_python_library(library_name: str) -> dict:
     """
     Install a Python library using pip.

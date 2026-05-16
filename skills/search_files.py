@@ -1,6 +1,39 @@
 import os
 import fnmatch
 
+DESCRIPTION = "Search for files by name pattern and optionally by content, starting from a directory."
+
+EXAMPLES = [
+    {
+        "user": "find all .py files in ~/projects",
+        "plan": [
+            {
+                "type": "call",
+                "function": "search_files",
+                "args": {
+                    "root_dir": "~/projects",
+                    "pattern": "*.py"
+                }
+            }
+        ]
+    },
+    {
+        "user": "search for files containing 'TODO' in ~/code",
+        "plan": [
+            {
+                "type": "call",
+                "function": "search_files",
+                "args": {
+                    "root_dir": "~/code",
+                    "search_content": "TODO"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def search_files(
     root_dir: str,

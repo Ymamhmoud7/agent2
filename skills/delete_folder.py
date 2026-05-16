@@ -1,6 +1,25 @@
 import os
 import shutil
 
+DESCRIPTION = "Delete a folder and all its contents."
+
+EXAMPLES = [
+    {
+        "user": "delete the folder ~/tmp/junk",
+        "plan": [
+            {
+                "type": "call",
+                "function": "delete_folder",
+                "args": {
+                    "folder_path": "~/tmp/junk"
+                }
+            }
+        ]
+    }
+]
+
+
+
 def delete_folder(folder_path: str) -> dict:
     """
     Deletes the specified folder and all its contents.

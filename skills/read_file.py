@@ -1,5 +1,36 @@
 import os
 
+DESCRIPTION = "Read and return the contents of a text file."
+
+EXAMPLES = [
+    {
+        "user": "read ~/notes/todo.txt",
+        "plan": [
+            {
+                "type": "call",
+                "function": "read_file",
+                "args": {
+                    "file_path": "~/notes/todo.txt"
+                }
+            }
+        ]
+    },
+    {
+        "user": "show me what's in ~/projects/readme.md",
+        "plan": [
+            {
+                "type": "call",
+                "function": "read_file",
+                "args": {
+                    "file_path": "~/projects/readme.md"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def read_file(file_path: str, encoding: str = "utf-8") -> dict:
     """

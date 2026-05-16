@@ -2,6 +2,33 @@ import platform
 import os
 import shutil
 
+DESCRIPTION = "Return a snapshot of system information: OS, architecture, CPU count, disk usage."
+
+EXAMPLES = [
+    {
+        "user": "show me my system info",
+        "plan": [
+            {
+                "type": "call",
+                "function": "get_system_info",
+                "args": {}
+            }
+        ]
+    },
+    {
+        "user": "how much disk space do I have left?",
+        "plan": [
+            {
+                "type": "call",
+                "function": "get_system_info",
+                "args": {}
+            }
+        ]
+    }
+]
+
+
+
 
 def get_system_info() -> dict:
     """

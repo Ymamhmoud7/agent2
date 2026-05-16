@@ -1,5 +1,26 @@
 import os
 
+DESCRIPTION = "Replace text in a file — find the first occurrence of a string and substitute it."
+
+EXAMPLES = [
+    {
+        "user": "in ~/notes/todo.txt replace 'buy milk' with 'buy oat milk'",
+        "plan": [
+            {
+                "type": "call",
+                "function": "edit_file",
+                "args": {
+                    "file_path": "~/notes/todo.txt",
+                    "old_text": "buy milk",
+                    "new_text": "buy oat milk"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def edit_file(file_path: str, old_text: str, new_text: str) -> dict:
     """

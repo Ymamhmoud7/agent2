@@ -1,5 +1,22 @@
 import subprocess
 
+DESCRIPTION = "Connect or disconnect Cloudflare WARP."
+
+EXAMPLES = [
+    {
+        "user": "turn off warp",
+        "plan": [
+            {"type": "call", "function": "toggle_warp", "args": {"enabled": False}}
+        ]
+    },
+    {
+        "user": "enable warp",
+        "plan": [
+            {"type": "call", "function": "toggle_warp", "args": {"enabled": True}}
+        ]
+    }
+]
+
 def toggle_warp(enabled: bool) -> dict:
     """
     Connect or disconnect Cloudflare WARP.

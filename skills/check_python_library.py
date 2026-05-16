@@ -2,6 +2,47 @@ import subprocess
 import sys
 import json
 
+DESCRIPTION = "Check if a Python library is installed, or list all installed libraries."
+
+EXAMPLES = [
+    {
+        "user": "is requests installed?",
+        "plan": [
+            {
+                "type": "call",
+                "function": "check_python_library",
+                "args": {
+                    "library_name": "requests"
+                }
+            }
+        ]
+    },
+    {
+        "user": "check if numpy is available",
+        "plan": [
+            {
+                "type": "call",
+                "function": "check_python_library",
+                "args": {
+                    "library_name": "numpy"
+                }
+            }
+        ]
+    },
+    {
+        "user": "list all installed python libraries",
+        "plan": [
+            {
+                "type": "call",
+                "function": "list_python_libraries",
+                "args": {}
+            }
+        ]
+    }
+]
+
+
+
 def check_python_library(library_name: str) -> dict:
     """
     Check whether a Python library is installed and get its version.

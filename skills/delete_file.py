@@ -1,5 +1,24 @@
 import os
 
+DESCRIPTION = "Delete a file at a given path."
+
+EXAMPLES = [
+    {
+        "user": "delete ~/downloads/old_report.pdf",
+        "plan": [
+            {
+                "type": "call",
+                "function": "delete_file",
+                "args": {
+                    "file_path": "~/downloads/old_report.pdf"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def delete_file(file_path: str) -> dict:
     """

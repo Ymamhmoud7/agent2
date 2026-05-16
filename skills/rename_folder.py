@@ -1,5 +1,25 @@
 import os
 
+DESCRIPTION = "Rename a folder while keeping it in the same parent directory."
+
+EXAMPLES = [
+    {
+        "user": "rename the folder ~/projects/old to new",
+        "plan": [
+            {
+                "type": "call",
+                "function": "rename_folder",
+                "args": {
+                    "folder_path": "~/projects/old",
+                    "new_name": "new"
+                }
+            }
+        ]
+    }
+]
+
+
+
 def rename_folder(folder_path: str, new_name: str) -> dict:
     """
     Rename a folder while keeping it in the same parent directory.

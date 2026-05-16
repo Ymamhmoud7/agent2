@@ -1,6 +1,37 @@
 import subprocess
 import shlex
 
+DESCRIPTION = "Run any shell command and return its output."
+
+EXAMPLES = [
+    {
+        "user": "run ls -la in my home directory",
+        "plan": [
+            {
+                "type": "call",
+                "function": "run_shell_command",
+                "args": {
+                    "command": "ls -la ~"
+                }
+            }
+        ]
+    },
+    {
+        "user": "what's my current IP address?",
+        "plan": [
+            {
+                "type": "call",
+                "function": "run_shell_command",
+                "args": {
+                    "command": "curl -s ifconfig.me"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def run_shell_command(command: str, timeout: int = 30, working_dir: str = None) -> dict:
     """

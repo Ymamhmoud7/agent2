@@ -1,5 +1,54 @@
 import os
 
+DESCRIPTION = "Create a new folder with a given name inside a parent directory."
+
+EXAMPLES = [
+    {
+        "user": "create a folder called projects in my home directory",
+        "plan": [
+            {
+                "type": "call",
+                "function": "create_folder",
+                "args": {
+                    "folder_name": "projects",
+                    "parent_path": "~"
+                }
+            }
+        ]
+    },
+    {
+        "user": "make 3 folders inside ~/workspace named alpha, beta, gamma",
+        "plan": [
+            {
+                "type": "call",
+                "function": "create_folder",
+                "args": {
+                    "folder_name": "alpha",
+                    "parent_path": "~/workspace"
+                }
+            },
+            {
+                "type": "call",
+                "function": "create_folder",
+                "args": {
+                    "folder_name": "beta",
+                    "parent_path": "~/workspace"
+                }
+            },
+            {
+                "type": "call",
+                "function": "create_folder",
+                "args": {
+                    "folder_name": "gamma",
+                    "parent_path": "~/workspace"
+                }
+            }
+        ]
+    }
+]
+
+
+
 def create_folder(folder_name: str, parent_path: str = ".") -> dict:
     """
     Create a new folder with the given name.

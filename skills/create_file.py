@@ -1,5 +1,38 @@
 import os
 
+DESCRIPTION = "Create a new file at a given path, optionally with content."
+
+EXAMPLES = [
+    {
+        "user": "create a file called notes.txt on my desktop",
+        "plan": [
+            {
+                "type": "call",
+                "function": "create_file",
+                "args": {
+                    "file_path": "~/Desktop/notes.txt",
+                    "content": ""
+                }
+            }
+        ]
+    },
+    {
+        "user": "make a file ~/projects/readme.md with content 'Hello World'",
+        "plan": [
+            {
+                "type": "call",
+                "function": "create_file",
+                "args": {
+                    "file_path": "~/projects/readme.md",
+                    "content": "Hello World"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def create_file(file_path: str, content: str = "", overwrite: bool = False) -> dict:
     """

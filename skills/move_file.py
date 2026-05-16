@@ -1,6 +1,26 @@
 import os
 import shutil
 
+DESCRIPTION = "Move a file to a different directory."
+
+EXAMPLES = [
+    {
+        "user": "move ~/downloads/report.pdf to ~/documents/reports",
+        "plan": [
+            {
+                "type": "call",
+                "function": "move_file",
+                "args": {
+                    "file_path": "~/downloads/report.pdf",
+                    "destination_dir": "~/documents/reports"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def move_file(file_path: str, destination_dir: str, overwrite: bool = False) -> dict:
     """

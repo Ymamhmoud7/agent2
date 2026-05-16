@@ -1,6 +1,26 @@
 import os
 import shutil
 
+DESCRIPTION = "Move a folder into a different parent directory."
+
+EXAMPLES = [
+    {
+        "user": "move ~/projects/old_project to ~/archive",
+        "plan": [
+            {
+                "type": "call",
+                "function": "move_folder",
+                "args": {
+                    "folder_path": "~/projects/old_project",
+                    "destination_dir": "~/archive"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def move_folder(folder_path: str, destination_dir: str, overwrite: bool = False) -> dict:
     """

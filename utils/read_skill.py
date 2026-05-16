@@ -37,7 +37,21 @@ def read_skill(skill_name):
                 })
             i += 1
 
+    examples = []
+    source = ''.join(lines)
+    try:
+        import ast
+        tree = ast.parse(source)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id == 'EXAMPLES':
+                        examples = ast.literal_eval(node.value)
+    except Exception:
+        pass
+
     return {
         'name': skill_name,
-        'functions': functions
+        'functions': functions,
+        'examples': examples
     }

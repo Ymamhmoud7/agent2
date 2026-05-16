@@ -1,5 +1,25 @@
 import os
 
+DESCRIPTION = "Rename a file while keeping it in the same directory."
+
+EXAMPLES = [
+    {
+        "user": "rename ~/docs/old_name.txt to new_name.txt",
+        "plan": [
+            {
+                "type": "call",
+                "function": "rename_file",
+                "args": {
+                    "file_path": "~/docs/old_name.txt",
+                    "new_name": "new_name.txt"
+                }
+            }
+        ]
+    }
+]
+
+
+
 
 def rename_file(file_path: str, new_name: str) -> dict:
     """

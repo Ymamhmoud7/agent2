@@ -23,6 +23,13 @@ def build_skills_context():
         else:
             lines.append("  (no functions found)")
 
+        examples = skill_info.get("examples", [])
+        if examples:
+            lines.append("  Examples:")
+            for ex in examples:
+                lines.append(f'    User: "{ex["user"]}"')
+                lines.append(f'    Plan: {json.dumps(ex["plan"])}')
+
     return "\n".join(lines)
 
 def handle_ai_message(message, ui):
