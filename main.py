@@ -29,7 +29,21 @@ def handle_ai_message(message, ui):
     eval = router.eval_user_input(message, "qwen2.5:3b")
     ui.print(f"Routing to {eval} evaluation...", ui.colour(4))
     if eval == "action":
-        ui.print(build_skills_context(), ui.colour(3))
+        skills_context = build_skills_context()
+        token_gen = send_message.message(message, "qwen2.5:3b", systemPrompt=f"You got these skills available:\n{skills_context}\n, I want you to make a list out of these skills and functions and give it to the user.")
+
+        current_line = ""
+        for token in token_gen:
+            for char in token:
+                if char == "\n":
+                    ui.flush_line(current_line)
+                    current_line = ""
+                else:
+                    current_line += char
+                    ui.print_token(char, len(current_line) - 1)
+
+        if current_line:
+            ui.flush_line(current_line)
     else:
         token_gen = send_message.message(message, (eval == "simple" and "qwen2.5:3b") or "qwen3.5:4b")
 
