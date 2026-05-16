@@ -7,12 +7,14 @@ from cli import ChatUI
 
 def handle_ai_message(message, ui):
     """Route message and stream AI response tokens into the UI."""
-    eval1 = router.eval_user_input(message)
 
-    if eval1 == "Action":
+    eval = router.eval_user_input(message, "qwen2.5:3b")
+    if eval == "Action":
         ui.print("Action detected!", ui.colour(3))
 
-    elif eval1 == "Not Action":
+    elif eval == "Not Action":
+        
+        
         token_gen = send_message.message(message, "qwen2.5:3b")
 
         current_line = ""
