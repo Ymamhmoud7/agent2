@@ -1,7 +1,7 @@
 import importlib.util
 import os
 
-SKILLS_DIR = os.path.join(os.path.dirname(__file__), 'skills')
+SKILLS_DIR = os.path.join(os.path.dirname(__file__), '..', 'skills')
 
 def load_skill_functionality(func_name: str):
     skill_path = os.path.join(SKILLS_DIR, f"{func_name}.py")
