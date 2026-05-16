@@ -43,6 +43,21 @@ Call Rules:
   "args": {}
 }
 
+- For actions that fetch information (status checks, reads, lookups), use type "query".
+  These work exactly like "call" but signal that the result should be reported to the user.
+
+{
+  "type": "query",
+  "function": "check_warp_status",
+  "args": {}
+}
+
+- For storing a query result to use later, add "store_as": "variable_name" to the query step.
+- For branching based on a result, use type "conditional" with a "condition" string,
+  "if_true" list of steps, and "if_false" list of steps.
+- Condition examples: "warp_status.connected == True", "warp_status.connected == False"
+- Always query before conditioning on the result.
+
 Folder Rules:
 - If the user says "make N folders inside X":
   1. First create X
@@ -88,4 +103,6 @@ Invalid Examples:
 
 If the request is unclear:
 {"plan":[]}
+
+
 """

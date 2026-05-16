@@ -73,7 +73,7 @@ def reflect_on_results(user_input: str, results: list[str], model: str) -> str:
 
 def execute_plan(plan: dict, executor) -> list[str]:
     results = []
-
+    context = {}  
 
     def resolve_args(args: dict, i: int = 0) -> dict:
         resolved = {}
@@ -83,24 +83,42 @@ def execute_plan(plan: dict, executor) -> list[str]:
                 def replace_expr(match):
                     expr = match.group(1).strip()
                     try:
-                        return str(eval(expr, {"i": i}))
+                        return str(eval(expr, {"i": i, **context}))
                     except:
-                        return match.group(0) 
+                        return match.group(0)
                 v = re.sub(r'\{([^}]+)\}', replace_expr, v)
             resolved[k] = v
         return resolved
-    
+
     def run_steps(steps: list, i: int = 0):
         for step in steps:
-            if step["type"] == "call":
+            stype = step.get("type")
+
+            if stype in ("call", "query"):
                 args = resolve_args(step.get("args", {}), i)
                 result = executor(step["function"], args)
-                results.append(f"[call] {step['function']}({args}) → {result}")
-            elif step['type'] == 'loop':
-                count = step.get("count", 0)
-                body = step.get("body", [])
-                for idx in range(count):
-                    run_steps(body, i=idx)
-    
+                label = "query" if stype == "query" else "call"
+                results.append(f"[{label}] {step['function']}({args}) → {result}")
+
+                # store result in context if requested
+                store_as = step.get("store_as")
+                if store_as and isinstance(result, dict):
+                    context[store_as] = result
+
+            elif stype == "loop":
+                for idx in range(step.get("count", 0)):
+                    run_steps(step.get("body", []), i=idx)
+
+            elif stype == "conditional":
+                condition = step.get("condition", "")
+                try:
+                    outcome = bool(eval(condition, {"__builtins__": {}}, context))
+                except Exception as e:
+                    results.append(f"[conditional] failed to evaluate '{condition}': {e}")
+                    continue
+
+                branch = step.get("if_true", []) if outcome else step.get("if_false", [])
+                run_steps(branch, i)
+
     run_steps(plan.get("plan", []))
     return results
