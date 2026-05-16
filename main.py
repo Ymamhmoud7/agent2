@@ -1,21 +1,37 @@
 import curses
 import router
 
-from utils import send_message
+from utils import send_message, get_skills, read_skill
 from cli import ChatUI
 
+def build_skills_context():
+    skills = get_skills.get_skills()
+
+    if not skills:
+        return "No skills available."
+
+    lines = ["Available skills and functions:"]
+    for skill_name in skills:
+        skill_info = read_skill.read_skill(skill_name)
+        lines.append(f"\nSkill: {skill_name}")
+        if skill_info["functions"]:
+            for func in skill_info["functions"]:
+                desc = f" — {func['description']}" if func['description'] else ""
+                lines.append(f"  - {func['name']}{desc}")
+        else:
+            lines.append("  (no functions found)")
+
+    return "\n".join(lines)
 
 def handle_ai_message(message, ui):
     """Route message and stream AI response tokens into the UI."""
 
     eval = router.eval_user_input(message, "qwen2.5:3b")
-    if eval == "Action":
-        ui.print("Action detected!", ui.colour(3))
-
-    elif eval == "Not Action":
-        
-        
-        token_gen = send_message.message(message, "qwen2.5:3b")
+    ui.print(f"Routing to {eval} evaluation...", ui.colour(4))
+    if eval == "action":
+        ui.print(build_skills_context(), ui.colour(3))
+    else:
+        token_gen = send_message.message(message, (eval == "simple" and "qwen2.5:3b") or "qwen3.5:4b")
 
         current_line = ""
         for token in token_gen:
@@ -29,10 +45,6 @@ def handle_ai_message(message, ui):
 
         if current_line:
             ui.flush_line(current_line)
-
-    else:
-        ui.print(f"Unknown message type: {eval1}", ui.colour(3))
-
 
 def run(stdscr):
     curses.curs_set(1)
