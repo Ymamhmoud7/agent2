@@ -46,6 +46,31 @@ Produce the JSON execution plan:"""
 
     return {"plan": [], "error": "Failed to parse valid JSON after retries."}
 
+def reflect_on_results(user_input: str, results: list[str], model: str) -> str:
+    results_str = "\n".join(results)
+
+    response = ollama.chat(
+        model=model,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a task assistant. The user asked you to do something and a set of actions were executed. "
+                    "You will be given the original request and the results of each action. "
+                    "Reflect on what happened: confirm what succeeded, explain any failures clearly, "
+                    "and suggest a fix if something went wrong. Be concise and direct."
+                )
+            },
+            {
+                "role": "user",
+                "content": f"Original request: {user_input}\n\nExecution results:\n{results_str}"
+            }
+        ],
+        options={"temperature": 0.3, "num_predict": 256}
+    )
+
+    return response["message"]["content"].strip()
+
 def execute_plan(plan: dict, executor) -> list[str]:
     results = []
 

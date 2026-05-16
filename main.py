@@ -45,13 +45,11 @@ def handle_ai_message(message, ui):
         if not plan.get("plan"):
             ui.print("No actions found for that request.", ui.colour(3))
             return
-        
-        ui.print("Planned actions:", ui.colour(4))
-        ui.print(json.dumps(plan["plan"], indent=2), ui.colour(3))
 
         results = planner.execute_plan(plan, executor.executor)
-        for line in results:
-            ui.print(line, ui.colour(2))
+        reflection = planner.reflect_on_results(message, results, model="qwen2.5:3b")
+        ui.print("", ui.colour(4))
+        ui.print(reflection, ui.colour(1))
     else:
         token_gen = send_message.message(message, (eval == "simple" and "qwen2.5:3b") or "qwen3.5:4b")
 
