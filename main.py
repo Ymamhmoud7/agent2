@@ -2,7 +2,7 @@ import curses
 import router
 import json
 
-from utils import send_message, get_skills, read_skill, planner
+from utils import send_message, get_skills, read_skill, planner, executor
 from cli import ChatUI
 from skills import create_folder
 
@@ -49,15 +49,7 @@ def handle_ai_message(message, ui):
         ui.print("Planned actions:", ui.colour(4))
         ui.print(json.dumps(plan["plan"], indent=2), ui.colour(3))
 
-        def executor(func_name, args):
-            if func_name == "create_folder":
-                return create_folder.create_folder(
-                    folder_name=args.get("folder_name", "New Folder"),
-                    parent_path=args.get("parent_path", ".")
-                )
-            return f"(stub) would call {func_name} with {args}"
-
-        results = planner.execute_plan(plan, executor)
+        results = planner.execute_plan(plan, executor.executor)
         for line in results:
             ui.print(line, ui.colour(2))
     else:
