@@ -20,6 +20,15 @@ CRITICAL RULES:
 - The output must be parseable by json.loads().
 - Treat the response as PURE DATA, not executable code.
 
+- For storing a query result to use later, add "store_as": "variable_name" to the query step.
+- For branching based on a result, use type "conditional" with a "condition" string,
+  "if_true" list of steps, and "if_false" list of steps.
+- Condition examples: "warp_status.connected == True", "warp_status.connected == False"
+- Always query before conditioning on the result.
+- To use a query result in a conditional, add "store_as": "warp_status" to the query step.
+- Then reference it in the condition as: "warp_status['connected'] == true"
+- The first step must be type "query" not "call" when storing results.
+
 Loop Rules:
 - Loops are represented ONLY with:
 {
@@ -49,14 +58,9 @@ Call Rules:
 {
   "type": "query",
   "function": "check_warp_status",
-  "args": {}
+  "args": {},
+  "store_as": "warp_status"
 }
-
-- For storing a query result to use later, add "store_as": "variable_name" to the query step.
-- For branching based on a result, use type "conditional" with a "condition" string,
-  "if_true" list of steps, and "if_false" list of steps.
-- Condition examples: "warp_status.connected == True", "warp_status.connected == False"
-- Always query before conditioning on the result.
 
 Folder Rules:
 - If the user says "make N folders inside X":
@@ -87,6 +91,36 @@ Valid Example:
             "folder_name": "folder_{i}",
             "parent_path": "./MAIN"
           }
+        }
+      ]
+    }
+  ]
+}
+
+Valid Conditional Example:
+{
+  "plan": [
+    {
+      "type": "query",
+      "function": "check_warp_status",
+      "args": {},
+      "store_as": "warp_status"
+    },
+    {
+      "type": "conditional",
+      "condition": "warp_status['connected'] == True",
+      "if_true": [
+        {
+          "type": "call",
+          "function": "toggle_warp",
+          "args": { "enabled": false }
+        }
+      ],
+      "if_false": [
+        {
+          "type": "call",
+          "function": "toggle_warp",
+          "args": { "enabled": true }
         }
       ]
     }

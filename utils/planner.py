@@ -6,6 +6,28 @@ import json
 from utils import ollama_utils
 from prompts import PLANNER_PROMPT
 
+def _expand_comprehension(expr: str) -> str:
+    count_match = re.search(r'range\((\d+)\)', expr)
+    template_match = re.search(r'\{(.*?)\}(?=\s*for)', expr, re.DOTALL)
+    if not count_match or not template_match:
+        return expr
+    count = int(count_match.group(1))
+    template = '{' + template_match.group(1) + '}'
+    template = re.sub(r'f"(.*?)"', r'"\1"', template)
+    template = re.sub(r"f'(.*?)'", r'"\1"', template)
+    items = [template] * count
+    return '[' + ','.join(items) + ']'
+
+def sanitize_raw(raw: str) -> str:
+    raw = re.sub(r'\bTrue\b', 'true', raw)
+    raw = re.sub(r'\bFalse\b', 'false', raw)
+    raw = re.sub(r'\bNone\b', 'null', raw)
+    raw = re.sub(r'f"(.*?)"', r'"\1"', raw)
+    raw = re.sub(r"f'(.*?)'", r'"\1"', raw)
+    raw = re.sub(r'\[\s*\{.*?\}\s*for\s+\w+\s+in\s+range\(\d+\)\s*\]',
+                 lambda m: _expand_comprehension(m.group(0)), raw, flags=re.DOTALL)
+    return raw
+
 def plan_actions(user_input: str, skills_context: str, model: str, retries: int = 3):
     if not ollama_utils.ollama_status():
         ollama_utils.ollama_serve()
@@ -28,7 +50,7 @@ Produce the JSON execution plan:"""
         )
 
         raw = response["message"]["content"].strip()
-
+        raw = sanitize_raw(raw)
         # Strip markdown fences
         if raw.startswith("```"):
             raw = raw.split("```")[1]
@@ -55,10 +77,15 @@ def reflect_on_results(user_input: str, results: list[str], model: str) -> str:
             {
                 "role": "system",
                 "content": (
-                    "You are a task assistant. The user asked you to do something and a set of actions were executed. "
-                    "You will be given the original request and the results of each action. "
-                    "Reflect on what happened: confirm what succeeded, explain any failures clearly, "
-                    "and suggest a fix if something went wrong. Be concise and direct."
+                    "You are a task assistant reporting execution results to the user. "
+                    "You will be given the original request and the results of each action as Python dicts. "
+                    "Rules for interpreting results: "
+                    "'success: True' means the action worked regardless of other field values. "
+                    "'connected: False' means the VPN is OFF, it is NOT a failure. "
+                    "'connected: True' means the VPN is ON. "
+                    "Report clearly what happened in plain English. "
+                    "Only call something a failure if 'success' is False. "
+                    "Be concise, 1-3 sentences max."
                 )
             },
             {
@@ -111,6 +138,7 @@ def execute_plan(plan: dict, executor) -> list[str]:
 
             elif stype == "conditional":
                 condition = step.get("condition", "")
+                condition = condition.replace("true", "True").replace("false", "False").replace("null", "None")
                 try:
                     outcome = bool(eval(condition, {"__builtins__": {}}, context))
                 except Exception as e:
