@@ -1,8 +1,10 @@
 import curses
 import router
+import json
 
-from utils import send_message, get_skills, read_skill
+from utils import send_message, get_skills, read_skill, planner
 from cli import ChatUI
+from skills import create_folder
 
 def build_skills_context():
     skills = get_skills.get_skills()
@@ -30,20 +32,34 @@ def handle_ai_message(message, ui):
     ui.print(f"Routing to {eval} evaluation...", ui.colour(4))
     if eval == "action":
         skills_context = build_skills_context()
-        token_gen = send_message.message(message, "qwen2.5:3b", systemPrompt=f"You got these skills available:\n{skills_context}\n, I want you to make a list out of these skills and functions and give it to the user.")
+        plan = planner.plan_actions(
+            message,
+            skills_context,
+            model="qwen2.5:3b"
+        )
 
-        current_line = ""
-        for token in token_gen:
-            for char in token:
-                if char == "\n":
-                    ui.flush_line(current_line)
-                    current_line = ""
-                else:
-                    current_line += char
-                    ui.print_token(char, len(current_line) - 1)
+        if "error" in plan:
+            ui.print(f"Planning error: {plan['error']}", ui.colour(1))
+            return
+        
+        if not plan.get("plan"):
+            ui.print("No actions found for that request.", ui.colour(3))
+            return
+        
+        ui.print("Planned actions:", ui.colour(4))
+        ui.print(json.dumps(plan["plan"], indent=2), ui.colour(3))
 
-        if current_line:
-            ui.flush_line(current_line)
+        def executor(func_name, args):
+            if func_name == "create_folder":
+                return create_folder.create_folder(
+                    folder_name=args.get("folder_name", "New Folder"),
+                    parent_path=args.get("parent_path", ".")
+                )
+            return f"(stub) would call {func_name} with {args}"
+
+        results = planner.execute_plan(plan, executor)
+        for line in results:
+            ui.print(line, ui.colour(2))
     else:
         token_gen = send_message.message(message, (eval == "simple" and "qwen2.5:3b") or "qwen3.5:4b")
 
