@@ -1,0 +1,5 @@
+books
+__pycache__
+.venv
+.vscode
+memory_store

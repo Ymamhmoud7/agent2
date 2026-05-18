@@ -49,8 +49,6 @@ def handle_ai_message(message, ui):
             ui.print(f"Planning error: {plan['error']}", ui.colour(1))
             return
         
-        print(plan)
-
         if not plan.get("plan"):
             ui.print("No actions found for that request.", ui.colour(3))
             return
