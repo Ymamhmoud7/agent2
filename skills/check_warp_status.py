@@ -10,7 +10,7 @@ EXAMPLES = [
             {
                 "type": "call",
                 "function": "check_warp_status",
-                "args": {}
+                "args": {}, "store_as": "warp_status"
             }
         ]
     },
@@ -20,7 +20,7 @@ EXAMPLES = [
             {
                 "type": "call",
                 "function": "check_warp_status",
-                "args": {}
+                "args": {}, "store_as": "warp_status"
             }
         ]
     }

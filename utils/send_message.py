@@ -1,22 +1,17 @@
 import ollama
 from utils import ollama_utils
 
-def message(user_input: str, Model: str, History: list[dict] = [], systemPrompt = "") -> str:
+def message(user_input: str, Model: str, History: list[dict] = [], systemPrompt: str = "", system_prefix: str = "") -> str:
     if ollama_utils.ollama_status() == False:
         print("Ollama is not running. Starting Ollama...")
         ollama_utils.ollama_serve()
 
-    
-    context_str = ""
-    if History:
-        recent = History[-6:] # last 3 turns
-        context_str = "\n".join([f"User: {turn['user']}\nAssistant: {turn['assistant']}" for turn in recent])
-        context_str = f"Context:\n{context_str}\n\n"
+    full_system = f"{system_prefix}\n\n{systemPrompt}".strip() if system_prefix else systemPrompt
 
     response = ollama.chat(
         model=Model,
         messages=[
-            {"role": "system", "content": systemPrompt},
+            {"role": "system", "content": full_system},
             *[
                 msg
                 for turn in History[-6:]
@@ -25,10 +20,9 @@ def message(user_input: str, Model: str, History: list[dict] = [], systemPrompt 
                     {"role": "assistant", "content": turn["assistant"]},
                 ]
             ],
-            {"role": "user", "content": user_input},  # just the raw message
+            {"role": "user", "content": user_input},
         ],
         stream=True
-        
     )
     for chunk in response:
         yield chunk['message']['content']

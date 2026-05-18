@@ -1,0 +1,15 @@
+{
+  "value": {
+    "os": "Windows",
+    "architecture": "AMD64",
+    "hostname": "DESKTOP-OHQU2GH",
+    "cpu_count": 16,
+    "disk": {
+      "total_gb": 475.76,
+      "used_gb": 466.99,
+      "free_gb": 8.78,
+      "percent_used": 98.2
+    }
+  },
+  "refreshed_at": "2026-05-18T12:23:08.184184"
+}

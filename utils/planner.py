@@ -37,7 +37,7 @@ def plan_actions(user_input: str, skills_context: str, model: str, retries: int 
 
 User request: {user_input}
 
-Produce the JSON execution plan:"""
+Produce the JSON Plan"""
 
     for attempt in range(retries):
         response = ollama.chat(
@@ -50,18 +50,23 @@ Produce the JSON execution plan:"""
         )
 
         raw = response["message"]["content"].strip()
-        raw = sanitize_raw(raw)
-
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-            raw = raw.strip()
 
         print(f"[planner raw attempt {attempt+1}]:\n{raw}\n")  # debug
 
+        # Strip code fences robustly — handles ```json, ``` json, bare ```, etc.
+        raw = re.sub(r"```[a-z]*\n?", "", raw).strip()
+        # Extract the first JSON object if prose surrounds it
+        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if json_match:
+            raw = json_match.group(0)
+
+        raw = sanitize_raw(raw)
+
         try:
             parsed = json.loads(raw)
+            # Support both {"plan": [...]} and bare [...] responses
+            if isinstance(parsed, list):
+                return {"plan": parsed}
             return {"plan": parsed.get("plan", [])}
         except json.JSONDecodeError as e:
             print(f"[planner] JSON parse failed (attempt {attempt+1}): {e}")

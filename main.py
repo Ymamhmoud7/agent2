@@ -3,6 +3,8 @@ import router
 import json
 
 from utils import send_message, get_skills, read_skill, planner, executor
+from utils.load_variables import get_variables_context
+from utils.refresh_variables import refresh_all
 from cli import ChatUI
 from skills import create_folder
 
@@ -33,8 +35,6 @@ def build_skills_context():
     return "\n".join(lines)
 
 def handle_ai_message(message, ui):
-    """Route message and stream AI response tokens into the UI."""
-
     eval = router.eval_user_input(message, "qwen2.5:3b")
     ui.print(f"Routing to {eval} evaluation...", ui.colour(4))
     if eval == "action":
@@ -49,6 +49,8 @@ def handle_ai_message(message, ui):
             ui.print(f"Planning error: {plan['error']}", ui.colour(1))
             return
         
+        print(plan)
+
         if not plan.get("plan"):
             ui.print("No actions found for that request.", ui.colour(3))
             return
@@ -58,7 +60,13 @@ def handle_ai_message(message, ui):
         ui.print("", ui.colour(4))
         ui.print(reflection, ui.colour(1))
     else:
-        token_gen = send_message.message(message, (eval == "simple" and "qwen2.5:3b") or "qwen3.5:4b")
+        variables_context = get_variables_context()
+        token_gen = send_message.message(
+            message,
+            (eval == "simple" and "qwen2.5:3b") or "qwen3.5:4b",
+            system_prefix=variables_context,
+            systemPrompt="Use the data i gave you to answer the user , i gave you info like time , location and warp status"
+        )
 
         current_line = ""
         for token in token_gen:
@@ -78,6 +86,11 @@ def run(stdscr):
     stdscr.clear()
 
     ui = ChatUI(stdscr)
+
+    try:
+        refresh_all()
+    except Exception as e:
+        pass  
 
     ui.print("Chat started. Type /exit to quit, /clear to clear output.", ui.colour(3))
     ui.print("")

@@ -2,22 +2,41 @@ PROMPT = """
 You are a message router. Read the message and output exactly one label.
 
 LABELS:
-- simple    (casual message, small talk, greeting, reaction — no task, no heavy thinking needed)
-- complex   (no task requested, but answering well requires math, coding, science, logic, or deep knowledge)
-- action    (a task is being requested)
+- simple    (casual message, small talk, greeting, question answerable from general knowledge — no tool/skill needed)
+- complex   (no task, but answering well requires math, coding, science, logic, or deep knowledge)
+- action    (a task is being requested AND a skill exists that can handle it)
 
-DECISION RULES:
-1. Is a task being requested? → action
-2. No task — but needs math, code, logic, science, or expert knowledge to answer well? → complex
-3. No task, no heavy thinking needed? → simple
+═══════════════════════════════════════════
+DECISION RULES — follow in this exact order
+═══════════════════════════════════════════
 
-EDGE CASES:
-- Single-word messages (even imperatives like "Help!") → simple
-- Real-time/live data questions ("What's the weather?", "BTC price?") → simple
-- Opinion or preference questions with no right answer ("Do you like pizza?") → simple
-- A non-task message that involves a math problem, algorithm, or technical concept → complex
+STEP 1 — Is a task being requested?
+  NO  → go to STEP 3
+  YES → go to STEP 2
 
-EXAMPLES:
+STEP 2 — Is there an AVAILABLE SKILL that can handle this task?
+  YES → action
+  NO  → simple   ← IMPORTANT: do NOT route to action if no skill can do it
+
+STEP 3 — Does answering well require math, code, logic, science, or expert reasoning?
+  YES → complex
+  NO  → simple
+
+═══════════════════════════════════
+HARD RULES (override everything else)
+═══════════════════════════════════
+
+- Asking about the CURRENT time, date, or year → simple  (the system has no clock skill; answer from knowledge)
+- Greetings, reactions, feelings, small talk → simple
+- Questions about what YOU can or cannot do → simple
+- Offensive, sexual, or inappropriate messages → simple  (do not route to action)
+- "What's X?" style factual lookups with no skill match → simple
+- Single-word or very short messages → simple
+- Status-check questions ("is X on?", "is X running?", "check X") → action ONLY if a skill exists for X, otherwise simple
+
+═════════════════════════
+EXAMPLES (no skills listed)
+═════════════════════════
 
 Message: "Hey!"
 Label: simple
@@ -25,50 +44,65 @@ Label: simple
 Message: "good morning"
 Label: simple
 
+Message: "how are you today?"
+Label: simple
+
+Message: "what year is it?"
+Label: simple
+
+Message: "what time is it?"
+Label: simple
+
+Message: "can you fuck?"
+Label: simple
+
 Message: "lol ok"
 Label: simple
 
-Message: "wow amazing"
+Message: "do you like pizza?"
 Label: simple
 
 Message: "I'm so tired today"
 Label: simple
 
-Message: "Can you help me with something?"
-Label: simple
-
-Message: "What's 2 + 2?"
-Label: simple
-
-Message: "What's the weather today?"
-Label: simple
-
 Message: "I wonder how sorting algorithms work"
-Label: complex
-
-Message: "I'm curious about how neural networks learn"
 Label: complex
 
 Message: "Hmm, how would you even prove that prime numbers are infinite?"
 Label: complex
 
-Message: "I was thinking about recursion today"
+Message: "explain how neural networks learn"
 Label: complex
 
-Message: "Summarize this article"
-Label: action
+Message: "is warp on?"
+Label: simple   ← no WARP skill available in this example
 
-Message: "Write me a poem about cats"
-Label: action
+════════════════════════════════════════════
+EXAMPLES (when skills ARE listed below)
+════════════════════════════════════════════
 
-Message: "Fix the bug in my code"
-Label: action
+If the available skills include "check_warp_status" or "toggle_warp":
+  Message: "is warp on?"
+  Label: action   ← skill exists for this
 
-Message: "What is the capital of France?"
-Label: action
+If the available skills include "get_system_info":
+  Message: "how much disk space do I have?"
+  Label: action
 
-Message: "Translate this to Spanish"
-Label: action
+If the available skills do NOT include anything time-related:
+  Message: "what time is it?"
+  Label: simple   ← no skill for this, answer from knowledge
 
-Now classify the next message. Output only the label (simple / complex / action), nothing else.
-"""
+If the available skills include "create_folder" or "delete_folder":
+  Message: "make a folder called projects"
+  Label: action
+
+If no skill matches:
+  Message: "write me a poem"
+  Label: simple   ← no poem-writing skill available
+
+═══════════════════════════════════════════════
+Now classify the next message.
+Output ONLY the label (simple / complex / action). Nothing else.
+═══════════════════════════════════════════════
+""" 
